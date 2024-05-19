@@ -6,12 +6,14 @@ from src.modules.capture import Capture
 from src.modules.notifier import Notifier
 from src.modules.listener import Listener
 from src.modules.gui import GUI
+# from src.modules.telegram import Telegram
 
 
 bot = Bot()
 capture = Capture()
 notifier = Notifier()
 listener = Listener()
+# telegram = Telegram()
 
 bot.start()
 while not bot.ready:
@@ -28,6 +30,10 @@ while not notifier.ready:
 listener.start()
 while not listener.ready:
     time.sleep(0.01)
+
+# telegram.start()
+# while not telegram.ready:
+#     time.sleep(0.01)
 
 print('\n[~] Successfully initialized Auto Maple')
 

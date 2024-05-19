@@ -19,7 +19,8 @@ class GUI:
         config.gui = self
 
         self.root = tk.Tk()
-        self.root.title('Auto Maple')
+        self.root.title('chrome')
+        # self.root.title('Auto Maple')
         icon = tk.PhotoImage(file='assets/icon.png')
         self.root.iconphoto(False, icon)
         self.root.geometry(GUI.RESOLUTIONS['DEFAULT'])

@@ -22,7 +22,7 @@ from src.common.interfaces import Configurable
 RUNE_BUFF_TEMPLATE = cv2.imread('assets/rune_buff_template.jpg', 0)
 
 
-class Bot(Configurable):
+class Telegram(Configurable):
     """A class that interprets and executes user-defined routines."""
 
     DEFAULT_CONFIG = {
@@ -72,7 +72,7 @@ class Bot(Configurable):
         """
 
         print('\n[~] Initializing detection algorithm:\n')
-        # model = detection.load_model()
+        model = detection.load_model()
         print('\n[~] Initialized detection algorithm')
 
         self.ready = True
@@ -95,25 +95,14 @@ class Bot(Configurable):
                 config.gui.view.details.display_info(config.routine.index)
 
                 # Execute next Point in the routine
-                # element = config.routine[config.routine.index]
-                # if self.rune_active and isinstance(element, Point) and element.location == self.rune_closest_pos:
-                if self.rune_active:
-                    # self._solve_rune(model)
-                    self._bumblebeerune()
-                # element.execute()
-                # config.routine.step()
+                element = config.routine[config.routine.index]
+                if self.rune_active and isinstance(element, Point) \
+                        and element.location == self.rune_closest_pos:
+                    self._solve_rune(model)
+                element.execute()
+                config.routine.step()
             else:
                 time.sleep(0.01)
-
-    async def _bumblebeerune(self):
-        """
-        Moves to the position of the rune and solves the arrow-key puzzle.
-        :param model:   None. 
-        :param sct:     sry, what does sct means?
-        :return:        None
-        """
-
-        await self.character.ac.solve_rune()
 
     @utils.run_if_enabled
     def _solve_rune(self, model):

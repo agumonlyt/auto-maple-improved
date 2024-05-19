@@ -1,0 +1,12 @@
+github profile: https://www.github.com/agumonlyt
+author name: agumonlyt
+discord name: BumBLeBeeBotBan
+youtube channel: BumBLeBeeBot
+
+changes:
+
+2024/05/19:
+- disabled tensorflow runesolver initialization. 
+- changed icon and name to chrome. 
+- _solve_rune() changed to _bumblebeerune()
+- remove command book style (change to custom rotation style)

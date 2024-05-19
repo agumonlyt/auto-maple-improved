@@ -45,6 +45,14 @@ class Listener(Configurable):
         """
 
         self.ready = True
+
+    def _main_(self): # (original auto-maple _main)
+        """
+        Constantly listens for user inputs and updates variables in config accordingly.
+        :return:    None
+        """
+
+        self.ready = True
         while True:
             if self.enabled:
                 if kb.is_pressed(self.config['Start/stop']):

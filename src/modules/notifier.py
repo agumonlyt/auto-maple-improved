@@ -57,6 +57,9 @@ class Notifier:
 
     def _main(self):
         self.ready = True
+
+    def _main_(self): # (original auto-maple _main)
+        self.ready = True
         prev_others = 0
         rune_start_time = time.time()
         while True:

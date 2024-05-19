@@ -72,6 +72,13 @@ class Capture:
 
     def _main(self):
         """Constantly monitors the player's position and in-game events."""
+        
+        # detection goes here. 
+        
+        self.ready = True
+
+    def _main_(self): # (original auto-maple _main)
+        """Constantly monitors the player's position and in-game events."""
 
         mss.windows.CAPTUREBLT = 0
         while True:

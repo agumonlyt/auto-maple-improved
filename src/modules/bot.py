@@ -9,7 +9,7 @@ import importlib
 import traceback
 from os.path import splitext, basename
 from src.common import config, utils
-from src.detection import detection
+# from src.detection import detection
 from src.routine import components
 from src.routine.routine import Routine
 from src.command_book.command_book import CommandBook
@@ -35,6 +35,9 @@ class Bot(Configurable):
 
         super().__init__('keybindings')
         config.bot = self
+
+        ## BumblebeeBot Patch
+        self.character = None
 
         self.rune_active = False
         self.rune_pos = (0, 0)
@@ -66,6 +69,33 @@ class Bot(Configurable):
         self.thread.start()
 
     def _main(self):
+        """
+        BumblebeeBot Custom Rotation Main Function Thread. 
+        :return:    None
+        """
+        
+        # g = Game((8, 63, self.minimapX, self.minimapY)) #
+        # self.character.setup(
+        #     classtype='customrotation',
+        #     g=self.g,
+        #     maplehwnd=self.maplehwnd
+        # )
+
+        self.ready = True
+        # config.listener.enabled = True
+        # last_fed = time.time()
+        while True:
+            if config.enabled:
+                now = time.time()
+                
+                if self.rune_active:
+                    print(f'rune_active_character_ac_solving_rune')
+                    # self.character.ac.solving_rune()
+                time.sleep(1)
+                # element.execute()
+                # config.routine.step()
+
+    def _main_(self): # (the original auto-maple main)
         """
         The main body of Bot that executes the user's routine.
         :return:    None
@@ -104,16 +134,6 @@ class Bot(Configurable):
                 # config.routine.step()
             else:
                 time.sleep(0.01)
-
-    async def _bumblebeerune(self):
-        """
-        Moves to the position of the rune and solves the arrow-key puzzle.
-        :param model:   None. 
-        :param sct:     sry, what does sct means?
-        :return:        None
-        """
-
-        await self.character.ac.solve_rune()
 
     @utils.run_if_enabled
     def _solve_rune(self, model):

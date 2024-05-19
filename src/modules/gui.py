@@ -76,13 +76,13 @@ class GUI:
     def start(self):
         """Starts the GUI as well as any scheduled functions."""
 
-        display_thread = threading.Thread(target=self._display_minimap)
-        display_thread.daemon = True
-        display_thread.start()
+        # display_thread = threading.Thread(target=self._display_minimap)
+        # display_thread.daemon = True
+        # display_thread.start()
 
-        layout_thread = threading.Thread(target=self._save_layout)
-        layout_thread.daemon = True
-        layout_thread.start()
+        # layout_thread = threading.Thread(target=self._save_layout)
+        # layout_thread.daemon = True
+        # layout_thread.start()
 
         self.root.mainloop()
 

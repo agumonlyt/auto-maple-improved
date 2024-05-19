@@ -6,7 +6,16 @@ youtube channel: BumBLeBeeBot
 changes:
 
 2024/05/19:
-- disabled tensorflow runesolver initialization. 
-- changed icon and name to chrome. 
-- _solve_rune() changed to _bumblebeerune()
-- remove command book style (change to custom rotation style)
+- bot:
+ - disabled tensorflow runesolver initialization. 
+ - changed icon and name to chrome. 
+ - _solve_rune() changed to _bumblebeerune()
+ - remove command book style (change to custom rotation style)
+- capture:
+ - change mss to gdi_capture. 
+- notifier:
+ - 
+- listener:
+ - disabled keyboard listener because from my experience, keyboard listener lags out my custom sleep timer. If your refresh rate is like 0.010 second, keyboard listener doesn't affect anything. But if your sleep timer requires you to sleep <= 0.001 second, your program will starts to lag. 
+- gui:
+ - disabled both minimap and saved_layout. 

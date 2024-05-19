@@ -1,13 +1,19 @@
 # Auto-Maple-Improved:
-Port over auto-maple system by Tan Jefrrey with my Bumblebee Bot code. 
+- Port over auto-maple system by Tan Jefrreyz with my Bumblebee Bot code. 
+- Performance and Speed is the key. 
+- Prioritize performance and speed, kill count, efficiency. 
+- Disabled most auto-maple default _main. 
+- Not using command book. If you know how to setup command book, feel free to use it. 
 
-
-
-
-
-
-
-
+.
+.
+.
+.
+.
+.
+.
+.
+.
 
 <h1 align="center">
   Auto Maple

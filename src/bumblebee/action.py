@@ -1464,7 +1464,7 @@ class Action:
         self.gorightattack_fjump()
         time.sleep(.7)
 
-    def solve_rune(self):
+    def solving_rune(self):
         self.stoprune=False
         g_variable = self.g.get_rune_location()
         x, y = (None, None) if g_variable is None else g_variable

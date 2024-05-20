@@ -61,14 +61,13 @@ def requires_driver(func):
 
     return wrapper
 
-from theinterception import Interception
-from theinterception import KEYBOARD_MAPPING
-from theinterception import _utils
-from theinterception import exceptions
-from theinterception import KeyStroke, MouseStroke, Stroke
-from theinterception import (FilterKeyState, FilterMouseState, KeyState, MouseFlag,
-                      MouseRolling, MouseState)
-from theinterception.types import MouseButton
+from src.bumblebee.theinterception import Interception
+from src.bumblebee.theinterception import KEYBOARD_MAPPING
+from src.bumblebee.theinterception import _utils
+from src.bumblebee.theinterception import exceptions
+from src.bumblebee.theinterception import KeyStroke, MouseStroke, Stroke
+from src.bumblebee.theinterception import (FilterKeyState, FilterMouseState, KeyState, MouseFlag,MouseRolling, MouseState)
+from src.bumblebee.theinterception.types import MouseButton
 
 try:
     interception = Interception()

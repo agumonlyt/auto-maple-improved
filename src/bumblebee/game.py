@@ -1,4 +1,4 @@
-import gdi_capture
+from src.bumblebee.gdi_capture import gdi_capture
 import numpy as np
 import cv2
 import time

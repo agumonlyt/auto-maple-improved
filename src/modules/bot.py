@@ -18,14 +18,17 @@ from src.common.vkeys import press, click
 from src.common.interfaces import Configurable
 
 # Extra import from BumblebeeBot patch
+import numpy as np
 from time import perf_counter
 import keyboard as pythonkeyboard
 from src.bumblebee.initinterception import left_click, right_click, initiate_move, auto_capture_devices2, keydown, keyup, keyupall, keydown_arrow, keyup_arrow, keyupall_arrow
 from src.bumblebee.game import Game
+from src.bumblebee.character import Character
 
 
 # The rune's buff icon
-RUNE_BUFF_TEMPLATE = cv2.imread('assets/rune_buff_template.jpg', 0)
+# RUNE_BUFF_TEMPLATE = cv2.imread('assets/rune_buff_template.jpg', 0)
+BUMBLEBEE_RUNE_BUFF_TEMPLATE = cv2.imread('assets/sealed_rune.png', cv2.IMREAD_GRAYSCALE)
 
 
 class Bot(Configurable):
@@ -43,7 +46,7 @@ class Bot(Configurable):
         config.bot = self
 
         ## BumblebeeBot Patch
-        self.character = None
+        self.character = Character()
 
         self.rune_active = False
         self.rune_pos = (0, 0)
@@ -80,17 +83,27 @@ class Bot(Configurable):
         :return:    None
         """
         
+        g = Game((8, 63, 200, 140))
 
-        g = Game((8, 63, 200, 140)) #
         self.character.setup(
             classtype='customrotation',
-            g=self.g,
+            g=g,
             maplehwnd=config.maplehwnd
         )
 
         self.ready = True
-        # config.listener.enabled = True
-        # last_fed = time.time()
+
+        ## ugly code starts here
+        now=perf_counter()
+        runetimer0=now
+        runetimer=0
+        rune=False
+        cctimer0=now
+        cctimer=0
+        cc=False
+        self.cc=False
+        xynotfound=0
+        ## ugly code ends here
         while True:
             if pythonkeyboard.is_pressed("esc"):
                 config.enabled=False
@@ -103,7 +116,7 @@ class Bot(Configurable):
                     if pythonkeyboard.is_pressed("f9"):
                         config.enabled=True
                         print(f'script resumed ..')
-            if self.character.ac.goingtoportal or self.character.ac.gotoportal1 or self.character.ac.gotoportal2 or self.character.ac.gotoportal3 or self.character.ac.gotoportal4:
+            if self.character.action.goingtoportal or self.character.action.gotoportal1 or self.character.action.gotoportal2 or self.character.action.gotoportal3 or self.character.action.gotoportal4:
                 time.sleep(.0001) # 
             else:
                 time.sleep(.011) # 
@@ -122,37 +135,49 @@ class Bot(Configurable):
                 xynotfound=0
                 self.character.perform_next_attack(x,y)
 
-                if self.character.ac.goingtoportal or self.character.ac.gotoportal1 or self.character.ac.gotoportal2 or self.character.ac.gotoportal3 or self.character.ac.gotoportal4:
+                if self.character.action.goingtoportal or self.character.action.gotoportal1 or self.character.action.gotoportal2 or self.character.action.gotoportal3 or self.character.action.gotoportal4:
                     pass
                 else:
                     now=perf_counter()                
-                    cctimer=now-cctimer0
-                    if cctimer>3000: # 60sec * 50min = 3000sec
-                        # cc=True
-                        keyupall()
-                        keyupall_arrow()
-                        self.changechannel()
-                        cctimer0=perf_counter() # reset
-                        self.cc=False
-                    if self.cc: # this is for red dot. 
-                        keyupall()
-                        keyupall_arrow()
-                        self.changechannel_zakum() # we don't go ardent because it has 5 min cd. 
-                        self.cc=False
+                    # cctimer=now-cctimer0
+                    # if cctimer>3000: # 60sec * 50min = 3000sec
+                    #     # cc=True
+                    #     keyupall()
+                    #     keyupall_arrow()
+                    #     self.changechannel()
+                    #     cctimer0=perf_counter() # reset
+                    #     self.cc=False
+                    # if self.cc: # this is for red dot. 
+                    #     keyupall()
+                    #     keyupall_arrow()
+                    #     self.changechannel_zakum() # we don't go ardent because it has 5 min cd. 
+                    #     self.cc=False
                     runetimer=now-runetimer0
-                    if runetimer > self.runecd:
-                        if not await self.FindRuneCDIcon():
-                            await self.character.gotorune() # and solve rune.
+                    if runetimer > 10:
+                        if not self.FindRuneCDIcon(g):
+                            self.character.action.solving_rune()
                         runetimer0=now
 
+    def FindRuneCDIcon(self,g):
+        g.generate_newest_screenshot()
+        img_gray = cv2.cvtColor(g.get_newest_screenshot(), cv2.COLOR_BGR2GRAY)                
+        w, h = self.template.shape[::-1]    
+        res = cv2.matchTemplate(img_gray,BUMBLEBEE_RUNE_BUFF_TEMPLATE,cv2.TM_CCOEFF_NORMED)
+        threshold = 0.8
+        loc = np.where( res >= threshold)
+        # print(f'{type(loc)=} {len(loc)=} {len(loc[0])=} {loc=}')
+        # for pt in zip(*loc[::-1]):
+        #     print(f'{type(pt)=} {pt=}')
+        #     cv2.rectangle(img_gray, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
+            # cv2.imshow('img',img_gray)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+            # cv2.imwrite('../image/res.png',img_gray)
+        if len(loc[0]) > 0:
+            print(f'{len(loc[0])=} on rune cooldown. dont find rune. ')
+            return True
+        return False
 
-
-            if self.rune_active:
-                print(f'rune_active_character_ac_solving_rune')
-                # self.character.ac.solving_rune()
-            time.sleep(1)
-            # element.execute()
-            # config.routine.step()
 
 
     def _main_(self): # (the original auto-maple main)
@@ -213,31 +238,31 @@ class Bot(Configurable):
         inferences = []
         for _ in range(15):
             frame = config.capture.frame
-            solution = detection.merge_detection(model, frame)
-            if solution:
-                print(', '.join(solution))
-                if solution in inferences:
-                    print('Solution found, entering result')
-                    for arrow in solution:
-                        press(arrow, 1, down_time=0.1)
-                    time.sleep(1)
-                    for _ in range(3):
-                        time.sleep(0.3)
-                        frame = config.capture.frame
-                        rune_buff = utils.multi_match(frame[:frame.shape[0] // 8, :],
-                                                      RUNE_BUFF_TEMPLATE,
-                                                      threshold=0.9)
-                        if rune_buff:
-                            rune_buff_pos = min(rune_buff, key=lambda p: p[0])
-                            target = (
-                                round(rune_buff_pos[0] + config.capture.window['left']),
-                                round(rune_buff_pos[1] + config.capture.window['top'])
-                            )
-                            click(target, button='right')
-                    self.rune_active = False
-                    break
-                elif len(solution) == 4:
-                    inferences.append(solution)
+            # solution = detection.merge_detection(model, frame)
+            # if solution:
+            #     print(', '.join(solution))
+            #     if solution in inferences:
+            #         print('Solution found, entering result')
+            #         for arrow in solution:
+            #             press(arrow, 1, down_time=0.1)
+            #         time.sleep(1)
+            #         for _ in range(3):
+            #             time.sleep(0.3)
+            #             frame = config.capture.frame
+            #             rune_buff = utils.multi_match(frame[:frame.shape[0] // 8, :],
+            #                                           RUNE_BUFF_TEMPLATE,
+            #                                           threshold=0.9)
+            #             if rune_buff:
+            #                 rune_buff_pos = min(rune_buff, key=lambda p: p[0])
+            #                 target = (
+            #                     round(rune_buff_pos[0] + config.capture.window['left']),
+            #                     round(rune_buff_pos[1] + config.capture.window['top'])
+            #                 )
+            #                 click(target, button='right')
+            #         self.rune_active = False
+            #         break
+            #     elif len(solution) == 4:
+            #         inferences.append(solution)
 
     def load_commands(self, file):
         try:

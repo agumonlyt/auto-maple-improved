@@ -3,7 +3,7 @@ import time
 from time import perf_counter
 from configparser import ConfigParser
 # from initinterception import interception, move_to, move_relative, left_click, keydown, keyup, sleep
-from initinterception import keydown, keyup, keyupall, keydown_arrow, keyup_arrow, keyupall_arrow, sleep, sleeplol
+from src.bumblebee.initinterception import keydown, keyup, keyupall, keydown_arrow, keyup_arrow, keyupall_arrow, sleep, sleeplol
 import win32gui
 from PIL import ImageGrab
 import json
@@ -27,7 +27,7 @@ class Action:
 
     def __init__(self):
         self.config = ConfigParser()
-        self.config.read('settings.ini')
+        self.config.read('src\\bumblebee\\settings.ini')
         self.atk = self.config.get('keybind', 'attack')
         self.jump = self.config.get('keybind', 'jump')
         self.teleport = self.config.get('keybind', 'teleport')
@@ -90,7 +90,7 @@ class Action:
         self.rotation_list = ['default']
         self.rotation='default'
         self.rotation_mapping = {
-            'default': self.clockwise,
+            'default': self.default,
         }  
         self.rotation='default'
 
@@ -101,9 +101,6 @@ class Action:
             self.maplehwnd=maplehwnd
         
     def perform_next_attack(self, x, y):
-        # self.limen1_7(x,y)
-        # self.clockwise(x,y)
-        print(f'{self.rotation=}')
         self.rotation_mapping[self.rotation](x,y)
         
     def get_rotation_list(self):
@@ -131,6 +128,8 @@ class Action:
         r = random.randint(x, y)
         r /= 1000
         sleep()
+
+    #################### BASIC PREDEFINED KEYPRESSES WITH SLEEP #########################3#
 
     def escp(self,x=31,y=101):
         keydown('esc')
@@ -588,6 +587,8 @@ class Action:
         r /= 1000
         sleep(r)
     
+    ##################### CUSTOM ATTACK SEQUENCE ##############################
+
     def leftattack(self):
         print(f'leftattack')
         self.leftp()
@@ -753,9 +754,6 @@ class Action:
         self.attackr()
         sleep(.1)
 
-
-
-
     def goleftattack_fjump(self):
         print(f'self.goleftattack_fjump')
         self.leftp()
@@ -818,8 +816,6 @@ class Action:
         self.jumpr()
         self.downr()
 
-    # polo portal hunting map rotation patch
-
     def upjumpup(self):
         print(f'upjumpup')
         self.jumpp()
@@ -829,261 +825,11 @@ class Action:
         self.jumpr()
         self.upr()
 
-    def bountyhuntrotation(self):
-        print(f'bountyhuntrotation')
-        for i in range(5):
-            random.choice([self.goleftattack,self.goattackleft,self.goleftattackk,self.goattackkleft])()
-            time.sleep(.502)
-        for i in range(5):
-            random.choice([self.gorightattack,self.goattackright,self.gorightattackk,self.goattackkright])()
-            time.sleep(.502)
-
-    def bountyhuntrotationv2(self): # adele flash jump
-        print(f'bountyhuntrotationv2')
-        for i in range(4):
-            self.goleftattack()
-            time.sleep(.502)
-        for i in range(4):
-            self.gorightattack()
-            time.sleep(.502)
-
-    def castlewallrotation(self):
-        print(f'castlewallrotation') 
-        random.choice([self.goleftattack,self.goattackleft,self.goleftattackk,self.goattackkleft, self.leftattack, self.rightattack, self.leftattackk, self.rightattackk])()
-        time.sleep(.5)
-        random.choice([self.gorightattack,self.goattackright,self.gorightattackk,self.goattackkright, self.leftattack, self.rightattack, self.leftattackk, self.rightattackk])()
-        time.sleep(.5)
-        # self.goleftattack()
-        # time.sleep(.502)
-        self.upjumpup()
-        time.sleep(.802)
-        random.choice([self.goleftattack,self.goattackleft,self.goleftattackk,self.goattackkleft, self.leftattack, self.rightattack, self.leftattackk, self.rightattackk])()
-        time.sleep(.5)
-        random.choice([self.gorightattack,self.goattackright,self.gorightattackk,self.goattackkright, self.leftattack, self.rightattack, self.leftattackk, self.rightattackk])()
-        time.sleep(.5)
-        # self.gorightattack()
-        # time.sleep(.502)
-        self.downjump()
-        time.sleep(.702)
-
-    def castlewallrotationv3(self):
-        print(f'castlewallrotationv3')
-        self.leftattack()
-        time.sleep(.5)
-        self.rightattack()
-        time.sleep(.5)
-        # self.goleftattack()
-        # time.sleep(.502)
-        self.ropeconnectpr()
-        time.sleep(.802)
-        self.leftattack()
-        time.sleep(.5)
-        self.rightattack()
-        time.sleep(.5)
-        # self.gorightattack()
-        # time.sleep(.502)
-        self.downjump()
-        time.sleep(.702)
-
-    def castlewallrotationv2(self):
-        print(f'castlewallrotationv2')
-        for i in range(2):
-            self.goleftattack()
-            time.sleep(.502)
-        self.ropeconnectpr()
-        time.sleep(.802)
-        for i in range(2):
-            self.gorightattack()
-            time.sleep(.502)
-        self.downjump()
-        time.sleep(.702)
-        self.attackp()
-        self.attackr()
-        time.sleep(.502)
-
-    def stormwingrotation(self):
-        print(f'stormwingrotation')
-        for i in range(5):
-            self.goleftattack()
-            time.sleep(.502)
-        self.ropeconnectpr()
-        time.sleep(.602)
-        for i in range(5):
-            self.gorightattack()
-            time.sleep(.502)
-        for i in range(5):
-            self.downjump()
-            time.sleep(.302)
-
-    def stormwing(self,x,y,goleft,goright):
-        if goright:
-            if x > self.sright:
-                if y < self.sbtm:
-                    self.godownattack()
-                    time.sleep(.3)
-                    random.choice([self.goleftattack,self.goattackleft,self.goleftattackk,self.goattackkleft])()
-                    time.sleep(.1)
-                elif y > self.stop:
-                    self.upjumpattack()
-                    time.sleep(.3)
-                goright=False
-                goleft=True
-            else:
-                random.choice([self.gorightattack,self.goattackright,self.gorightattackk,self.goattackkright])()
-                time.sleep(.3)
-            if x < self.sleft: # only if x < left
-                if y < self.sbtm:
-                    self.godownattack()
-                    time.sleep(.3)
-        elif goleft:
-            if x < self.sleft: # only if x < left
-                if y > self.stop:
-                    time.sleep(.1)
-                    self.upjumpattack()
-                    time.sleep(.3)
-                elif y < self.stop:
-                    self.godownattack()
-                    time.sleep(.3)
-                    random.choice([self.gorightattack,self.goattackright,self.gorightattackk,self.goattackkright])()
-                    time.sleep(.3)
-                goright=True
-                goleft=False
-            else:
-                random.choice([self.goleftattack,self.goattackleft,self.goleftattackk,self.goattackkleft])()
-                time.sleep(.3)
-            if x > self.sright: # only if x > right
-                if y < self.sbtm:
-                    self.godownattack()
-                    time.sleep(.3)
-        return goleft,goright
-
-
-    # main rotation
-    #     
-    def perform_next_attack(self,x,y):
-        if y > self.top and (y > self.btm-self.offsety and y <= self.btm+self.offsety):
-            if x > self.left+self.offsetx:
-                if x < self.left+self.offsetx+5:
-                    random.choice([self.leftwalk])()
-                else:
-                    random.choice([self.goleftattack, self.goleftattackk])()
-            elif x < self.left-self.offsetx:
-                if x > self.left-self.offsetx-5:
-                    random.choice([self.rightwalk])()
-                else:
-                    random.choice([self.gorightattack, self.gorightattackk])()
-            elif x >= self.left-self.offsetx and x <= self.left+self.offsetx:
-                if self.replaceropeconnect:
-                    random.choice([self.goupattack_v3])()
-                else:
-                    random.choice([self.goupattack])()
-        elif y <= self.top+self.offsety and y > self.top-self.offsety:
-            if x < self.right-self.offsetx:
-                random.choice([self.gorightattack, self.gorightattackk])()
-            elif x > self.right+self.offsetx:
-                random.choice([self.goleftattack, self.goleftattackk])()
-            elif x >= self.right-self.offsetx and x <= self.right+self.offsetx:
-                random.choice([self.godownattack])()
-        elif y > self.top and not (y > self.btm-self.offsety and y <= self.btm+self.offsety):
-            if x >= self.left-self.offsetx and x <= self.left+self.offsetx:
-                if self.replaceropeconnect:
-                    random.choice([self.goupattack_v3])()
-                else:
-                    random.choice([self.goupattack])()
-            elif x >= self.right-self.offsetx and x <= self.right+self.offsetx:
-                random.choice([self.godownattack])()
-            else:
-                if x < ((self.right-self.left)/2):
-                    if self.replaceropeconnect:
-                        random.choice([self.goupattack_v3])()
-                    else:
-                        random.choice([self.goupattack])()
-                elif x >= ((self.right-self.left)/2):
-                    random.choice([self.godownattack])()
-        else:
-            random.choice([self.godownattack])()
-
-
-    def default(self,x,y):
-        if y > self.top and (y > self.btm-self.offsety and y <= self.btm+self.offsety):
-            if x > self.left+self.offsetx:
-                if x < self.left+self.offsetx+5:
-                    random.choice([self.leftwalk])()
-                else:
-                    random.choice([self.goleftattack, self.goleftattackk])()
-            elif x < self.left-self.offsetx:
-                if x > self.left-self.offsetx-5:
-                    random.choice([self.rightwalk])()
-                else:
-                    random.choice([self.gorightattack, self.gorightattackk])()
-            elif x >= self.left-self.offsetx and x <= self.left+self.offsetx:
-                if self.replaceropeconnect:
-                    random.choice([self.goupattack_v3])()
-                else:
-                    random.choice([self.goupattack])()
-        elif y <= self.top+self.offsety and y > self.top-self.offsety:
-            if x < self.right-self.offsetx:
-                random.choice([self.gorightattack, self.gorightattackk])()
-            elif x > self.right+self.offsetx:
-                random.choice([self.goleftattack, self.goleftattackk])()
-            elif x >= self.right-self.offsetx and x <= self.right+self.offsetx:
-                random.choice([self.godownattack])()
-        elif y > self.top and not (y > self.btm-self.offsety and y <= self.btm+self.offsety):
-            if x >= self.left-self.offsetx and x <= self.left+self.offsetx:
-                if self.replaceropeconnect:
-                    random.choice([self.goupattack_v3])()
-                else:
-                    random.choice([self.goupattack])()
-            elif x >= self.right-self.offsetx and x <= self.right+self.offsetx:
-                random.choice([self.godownattack])()
-            else:
-                if x < ((self.right-self.left)/2):
-                    if self.replaceropeconnect:
-                        random.choice([self.goupattack_v3])()
-                    else:
-                        random.choice([self.goupattack])()
-                elif x >= ((self.right-self.left)/2):
-                    random.choice([self.godownattack])()
-        else:
-            random.choice([self.godownattack])()
-
-        self.post_perform_action(x,y)
-
-
-
-
-            
-    def leftright(self,x,y):
-        if self.goleft:
-            if x >= self.left-self.offsetx and x <= self.left+self.offsetx:
-                random.choice([self.goupattack])()
-                if y > self.top-self.offsety and y <= self.top+self.offsety:
-                    self.goright=True
-                    self.goleft=False
-                print(f'testing: heightdiff={y-self.top}')
-            else:
-                random.choice([self.goleftattack, self.goleftattackk])()
-        elif self.goright:
-            if x >= self.right-self.offsetx and x <= self.right+self.offsetx:
-                random.choice([self.godownattack])()
-                if y > self.btm-self.offsety and y <= self.btm+self.offsety:
-                    self.goleft=True
-                    self.goright=False
-            else:
-                random.choice([self.gorightattack, self.gorightattackk])()
-        else:
-            print(f'exception coordinates .. please fix asap .. {x=} {y=}')
-
-        self.post_perform_action(x,y)
-        
-
     ############### ENTER PORTAL ALGORITHM ###################
 
     def portalenterorskip(self,x,y):
         if self.gotoportal1:
-            # print(f'first {x=} {y=} {se   lf.plbm2=} {self.prbp2=  }')
             if not self.goingtoportal and not (x >= self.plbm2 and x <= self.prbp2):
-                # if x>=46.5 and x<=48.5: # dangerous portal
                 self.firstx = x
                 if x>175.5: # dangerous portal
                     keyupall()
@@ -1101,7 +847,6 @@ class Action:
                     self.upr()
                     print(f'pressing left up ..')  
                 self.goingtoportal=True
-                # continue
                 return
             elif x >= self.plbm2 and x <= self.prbp2:
                 # print(f'goingtoportal equals true ..')
@@ -1127,54 +872,6 @@ class Action:
                     self.goingtoportal=False
                     self.tries=0
                     return
-                # if x >= self.plbm2 and x <= self.prbp2:
-                #     print(f'send300 gotoportal1 [test=1s]')
-                #     keyupall()
-                #     keyupall_arrow()
-                #     self.gotoportal1=False
-                #     self.goingtoportal=False
-                #     self.tries=0
-                #     # while True:
-                #     for i in range(15): # hopefully don't stucked forever
-                #         g_variable = self.g.get_player_location() # double checking
-                #         x, y = (None, None) if g_variable is None else g_variable
-                #         if x == None:
-                #             pass
-                #         else:
-                #             # if x > 129.5:
-                #             # if x > 180.5:
-                #             if y <= self.successthresholdy:
-                #                 keyupall()
-                #                 keyupall_arrow()
-                #                 print(f'successfully use portal. {y=} [test=2s]')
-                #                 break
-                #             else:
-                #                 print(f'uppr saves, x, {x} {y=}')
-                #                 if x < self.plb:
-                #                     print(f'self.plb')
-                #                     self.rightp(111,171)
-                #                     self.rightr(111,171)
-                #                 elif x > self.prb:
-                #                     print(f'self.prb')
-                #                     self.leftp(111,171)
-                #                     self.leftr(111,171)
-                #                 self.upp(31,101)
-                #                 self.upr(31,101)
-                #                 sleep(.050)
-                #                 # sleep(.010)
-                        # if self.pause:
-                        #     keyupall()
-                        #     while (self.pause):
-                        #         time.sleep(2)
-                        #         print('playactions == blocked: (new feature: sleeping(2))')
-                        #         print('playactions == released: (new feature: sleeping(2))')
-                        #         # if stop_event.is_set():
-                        #         #     sendnclose()
-                        #         #     stop_flag = True
-                        #         #     return
-                    # time.sleep(5)
-                    # gotoportal2=True
-                    # continue
                 else:
                     if self.firstx < self.plb:
                         if x > self.prb:
@@ -1205,8 +902,6 @@ class Action:
                                 if x == None:
                                     pass
                                 else:
-                                    # if x > 129.5:
-                                    # if x > 180.5:
                                     if y <= self.successthresholdy:
                                         keyupall()
                                         keyupall_arrow()
@@ -1229,216 +924,8 @@ class Action:
                                             self.upp(31,101)
                                             self.upr(31,101)
                                             sleep(.010)
-        # if gotoportal2:
-        #     if not goingtoportal and not (x >= 177.5 and x <= 182.5):
-        #         lockit()
-        #         if x >= 207.5 and x <=209.5: # right hand side next map portal
-        #             leftp()
-        #         elif x < 179.5:
-        #             rightp()
-        #             upp()
-        #         elif x > 180.5:
-        #             leftp()
-        #             upp()
-        #         goingtoportal=True
-        #         continue
-        #     elif x >= 177.5 and x <= 182.5:
-        #         goingtoportal = True
-        #     if goingtoportal:
-        #         if x <= 167.5 or x >= 200.5:
-        #             shiftpr()
-        #             print(f'tries finished. ')
-        #             send5('00')
-        #             gotoportal2=False
-        #             goingtoportal=False
-        #             tries=0
-        #         if x >= 177.5 and x <= 182.5:
-        #             print(f'send300 gotoportal2')
-        #             send5('00')
-        #             send5('00')
-        #             gotoportal2=False
-        #             goingtoportal=False
-        #             tries=0
-        #             unlock()
-        #             sleep(.1)
-        #             # while True:
-        #             for i in range(15):
-        #                 g_variable = g.get_player_location() # double checking
-        #                 x, y = (None, None) if g_variable is None else g_variable
-        #                 if x == None:
-        #                     pass
-        #                 else:
-        #                     if x < 68.5:
-        #                         sleep(.1)
-        #                         break
-        #                     else:                                        
-        #                         print(f'uppr saves, x, {x}')
-        #                         if x < 179.5:
-        #                             rightp(71,111)
-        #                             rightr(71,131)
-        #                         elif x > 180.5:
-        #                             leftp(71,111)
-        #                             leftr(71,131)
-        #                         uppr()
-        #                         sleep(.05)
-        #                 if myvariable:
-        #                     send5('00')
-        #                     while (myvariable):
-        #                         time.sleep(2)
-        #                         print('playactions == blocked: (new feature: sleeping(2))')
-        #                         print('playactions == released: (new feature: sleeping(2))')
-        #                         if stop_event.is_set():
-        #                             sendnclose()
-        #                             stop_flag = True
-        #                             return
-        #             # time.sleep(5)
-        #             # gotoportal1=True
-        #             continue
-        #         else:
-        #             tries+=1
-        #             if tries > 90:
-        #                 print(f'tries finished. ')
-        #                 send5('00')
-        #                 gotoportal2=False
-        #                 goingtoportal=False
-        #                 tries=0
-        # if gotoportal3:
-        #     if not goingtoportal and not (x >= 188.5 and x <= 193.5):
-        #         lockit()
-        #         if x < 190.5:
-        #             rightp()
-        #             upp()
-        #         elif x > 191.5:
-        #             leftp()
-        #             upp()
-        #         goingtoportal=True
-        #         continue
-        #     elif x >= 188.5 and x <= 193.5:
-        #         goingtoportal = True
-        #     if goingtoportal:
-        #         if x >= 188.5 and x <= 193.5:
-        #             print(f'send300 gotoportal3')
-        #             send5('00')
-        #             send5('00')
-        #             gotoportal3=False
-        #             goingtoportal=False
-        #             tries=0
-        #             unlock()
-        #             sleep(.1)
-        #             # while True:
-        #             for i in range(15):
-        #                 g_variable = g.get_player_location() # double checking
-        #                 x, y = (None, None) if g_variable is None else g_variable
-        #                 if x == None:
-        #                     pass
-        #                 else:
-        #                     # if x < 68.5:
-        #                     if y > 60.5: # 70.5
-        #                         sleep(.1)
-        #                         break
-        #                     else:                                        
-        #                         print(f'uppr saves, x, {x}')
-        #                         if x < 190.5:
-        #                             rightp(71,111)
-        #                             rightr(71,131)
-        #                         elif x > 191.5:
-        #                             leftp(71,111)
-        #                             leftr(71,131)
-        #                         uppr()
-        #                         sleep(.05)
-        #                 if myvariable:
-        #                     send5('00')
-        #                     while (myvariable):
-        #                         time.sleep(2)
-        #                         print('playactions == blocked: (new feature: sleeping(2))')
-        #                         print('playactions == released: (new feature: sleeping(2))')
-        #                         if stop_event.is_set():
-        #                             sendnclose()
-        #                             stop_flag = True
-        #                             return
-        #             # time.sleep(5)
-        #             # gotoportal1=True
-        #             continue
-        #         else:
-        #             tries+=1
-        #             if tries > 90:
-        #                 print(f'tries finished. ')
-        #                 send5('00')
-        #                 gotoportal3=False
-        #                 goingtoportal=False
-        #                 tries=0
-        # if gotoportal4:
-        #     if not goingtoportal and not (x >= 55.5 and x <= 60.5):
-        #         lockit()
-        #         if x < 57.5:
-        #             rightp()
-        #             upp()
-        #         elif x > 58.5:
-        #             leftp()
-        #             upp()
-        #         goingtoportal=True
-        #         continue
-        #     elif x >= 55.5 and x <= 60.5:
-        #         goingtoportal = True
-        #     if goingtoportal:
-        #         if x >= 55.5 and x <= 60.5:
-        #             print(f'send300 gotoportal4')
-        #             send5('00')
-        #             send5('00')
-        #             gotoportal4=False
-        #             goingtoportal=False
-        #             tries=0
-        #             unlock()
-        #             sleep(.1)
-        #             # while True:
-        #             for i in range(15):
-        #                 g_variable = g.get_player_location() # double checking
-        #                 x, y = (None, None) if g_variable is None else g_variable
-        #                 if x == None:
-        #                     pass
-        #                 else:
-        #                     # if x < 68.5:
-        #                     if y > 60.5: # 70.5
-        #                         sleep(.1)
-        #                         break
-        #                     else:                                        
-        #                         print(f'uppr saves, x, {x}')
-        #                         if x < 57.5:
-        #                             rightp(71,111)
-        #                             rightr(71,131)
-        #                         elif x > 58.5:
-        #                             leftp(71,111)
-        #                             leftr(71,131)
-        #                         uppr()
-        #                         sleep(.05)
-        #                 if myvariable:
-        #                     send5('00')
-        #                     while (myvariable):
-        #                         time.sleep(2)
-        #                         print('playactions == blocked: (new feature: sleeping(2))')
-        #                         print('playactions == released: (new feature: sleeping(2))')
-        #                         if stop_event.is_set():
-        #                             sendnclose()
-        #                             stop_flag = True
-        #                             return
-        #             # time.sleep(5)
-        #             # gotoportal1=True
-        #             continue
-        #         else:
-        #             tries+=1
-        #             if tries > 90:
-        #                 print(f'tries finished. ')
-        #                 send5('00')
-        #                 gotoportal4=False
-        #                 goingtoportal=False
-        #                 tries=0
 
-
-
-
-
-
-    ################## REFACTOR GOTORUNE PATCH ###################
+    ################## REFACTORED RUNE SOLVING PATCH ######################
 
     def runegoupmovement(self,x=31,y=101):
         print(f'runegoupmovement')
@@ -1640,9 +1127,17 @@ class Action:
             time.sleep(0.001)
         print(f'{perf_counter()-now=}')
 
+    #################### DEFAULT ROTATION. WRITE YOUR CUSTOM ROTATION HERE. ####################################
 
+    def default(self,x,y):
+        if x < 30.5:
+            random.choice([self.gorightattack_fjump])()
+        elif x >= 30.5:
+            random.choice([self.goleftattack_fjump])()
+        self.post_perform_action(x,y)
 
-    ############ POST_PERFORM_ACTION ALWAYS PUT AT LAST FOR EASY TO READ ############
+    ################## POST_PERFORM_ACTION ALWAYS PUT AT LAST FOR EASY TO READ ########################
+
     def post_perform_action(self,x,y):
         self.now = perf_counter()
         self.randomtimer = self.now - self.randomtimer0
@@ -1654,48 +1149,11 @@ class Action:
                 print(f'randomiser {code=}')
                 self.send2(code)
                 self.send3(code)
-        if self.replaceropeconnect==True:
-            if runonce:
-                replaceropeconnecttimer0=self.now
-                runonce=False
-            replaceropeconnecttimer = self.now - replaceropeconnecttimer0
-            if replaceropeconnecttimer > 90:
-                self.replaceropeconnect=False
-                runonce=True
-        # self.cosmicshowerplanttimer = self.now - self.cosmicshowerplanttimer0
-        # if self.cosmicshowerplanttimer > 59:
-        #     self.cosmicshowerplant = True
         # self.fountaintimer = self.now - self.fountaintimer0
         # if self.fountaintimer > 59:
         #     self.fountain = True
         
-        ######### RUNETIMER IS NOT NEEDED ANYMORE WE CHECK RUNE CD IN MAIN LOOP ###########3
-        # self.runetimer = self.now - self.runetimer0
-        # if runetimer > 600: # change to 600 when haste
-        # if self.runetimer > 900: # change to 600 when haste
-        #     self.checkrune = True
-        #     # self.checkrune = False
-        # if self.checkrune:
-        #     self.solverune = self.runesolver.runechecker(self.g)
-        # if self.solverune:
-        #     self.solverune=False
-        #     self.runesolver.gotorune(self.g)
-        #     random.choice([self.gorightattack, self.goleftattack])()
-        #     time.sleep(1.5)
-        #     self.checkrune = self.runesolver.runechecker(self.g)
-        #     print(f'here shows previous rune solver success or missed. True means still got rune. False means rune is solved. {self.checkrune = }')
-        #     self.runetimer0 = perf_counter()
-        # print(f'{x=} {y=} rt={self.runetimer} sr={self.solverune} ft={self.fountaintimer} gl={self.goleft} gr={self.goright}')
-        ######### RUNETIMER IS NOT NEEDED ANYMORE WE CHECK RUNE CD IN MAIN LOOP ###########
-
-        print(f'{x=} {y=} ft={self.fountaintimer} gl={self.goleft} gr={self.goright}')
-
-
-
-
-
-
-    # randomiser patch
+    ############ RANDOMISER PATCH ###############
 
     def send2(self, code):
         keydown(code)

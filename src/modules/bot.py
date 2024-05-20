@@ -110,7 +110,7 @@ class Bot(Configurable):
             if not config.enabled:
                 keyupall()
                 keyupall_arrow()
-                print(f'script is paused .. press f9 to resume. ')
+                print(f'script is paused .. hold f9 to resume .. hold esc to pause again .. ')
                 while not config.enabled:
                     time.sleep(1)
                     if pythonkeyboard.is_pressed("f9"):
@@ -134,7 +134,7 @@ class Bot(Configurable):
             else: #
                 xynotfound=0
                 self.character.perform_next_attack(x,y)
-
+         
                 if self.character.action.goingtoportal or self.character.action.gotoportal1 or self.character.action.gotoportal2 or self.character.action.gotoportal3 or self.character.action.gotoportal4:
                     pass
                 else:
@@ -161,18 +161,18 @@ class Bot(Configurable):
     def FindRuneCDIcon(self,g):
         g.generate_newest_screenshot()
         img_gray = cv2.cvtColor(g.get_newest_screenshot(), cv2.COLOR_BGR2GRAY)                
-        w, h = self.template.shape[::-1]    
         res = cv2.matchTemplate(img_gray,BUMBLEBEE_RUNE_BUFF_TEMPLATE,cv2.TM_CCOEFF_NORMED)
         threshold = 0.8
         loc = np.where( res >= threshold)
         # print(f'{type(loc)=} {len(loc)=} {len(loc[0])=} {loc=}')
+        # w, h = BUMBLEBEE_RUNE_BUFF_TEMPLATE.shape[::-1]    
         # for pt in zip(*loc[::-1]):
         #     print(f'{type(pt)=} {pt=}')
         #     cv2.rectangle(img_gray, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
-            # cv2.imshow('img',img_gray)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
-            # cv2.imwrite('../image/res.png',img_gray)
+        #     cv2.imshow('img',img_gray)
+        #     cv2.waitKey(0)
+        #     cv2.destroyAllWindows()
+        #     cv2.imwrite('../image/res.png',img_gray)
         if len(loc[0]) > 0:
             print(f'{len(loc[0])=} on rune cooldown. dont find rune. ')
             return True

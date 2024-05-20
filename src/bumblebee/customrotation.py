@@ -1,15 +1,8 @@
 import random
 import time
 from time import perf_counter
-# from configparser import ConfigParser
 from src.bumblebee.action import Action
 from src.bumblebee.initinterception import sleep
-
-
-
-
-
-
 
 
 class Customrotation(Action):
@@ -17,7 +10,10 @@ class Customrotation(Action):
     def __init__(self):
         super().__init__()
 
-        ########## ALL TIMER GOES HERE ######################
+        ########## CUSTOM VARIABLES ########################################
+        self.flag=False
+
+        ########## ALL TIMER GOES HERE #####################################
         self.fountaintimer0=0
         self.fountaintimer=0
         self.fountain=True
@@ -52,7 +48,109 @@ class Customrotation(Action):
         self.rotation_mapping[self.rotation](x,y)
         
 
+
+    ############ CUSTOM ROTATION #################################################################################
+
+    def default_left_attack(self):
+        print(f'default_left_attack')
+        self.leftp(222,333)
+        self.attackp()
+        self.attackr()
+        self.leftr()
+        time.sleep(.1)
+        time.sleep(.8)
+
+    def default_right_attack(self):
+        print(f'default_right_attack')
+        self.rightp(222,333)
+        self.attackp()
+        self.attackr()
+        self.rightr()
+        time.sleep(.1)
+        time.sleep(.8)
+
+    def default(self,x,y):
+        if x < 69.5:
+            if self.flag:
+                self.flag=False
+                random.choice([self.default_right_attack])()                
+            else:
+                random.choice([self.default_left_attack])()
+                self.flag=True
+        elif x >= 69.5:
+            if self.flag:
+                self.flag=False
+                random.choice([self.default_right_attack])()
+            else:
+                random.choice([self.default_left_attack])()
+                self.flag=True
+        self.portal_usage_check(x,y)        
+        self.post_perform_action(x,y)
+
+    ############ POST_PERFORM_ACTION #############################################################################
+
+    def post_perform_action(self,x,y):
+        self.now = perf_counter()
+        self.randommtimer = self.now - self.randommtimer0
+        if self.randommtimer > 15:
+            self.randommtimer0 = self.now
+            # p = random.randint(0, len(self.randomlist)-1)
+            code = random.choice(self.randomlist)
+            if code is not None:
+                print(f"pressing random button: '{code}'")
+                self.bum_(code)
+                self._bum(code)
+        self.fountaintimer = self.now - self.fountaintimer0
+        if self.fountaintimer > 56:
+            self.fountain = True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     ################ LIST OF PREDIFINED ATTACK SEQUENCE ##############################################################
+    ################ VERY UGLY CODES #################################################################################
+    ################ ADD MORE CUSTOM ATTACK SEQUENCE BELOW ###########################################################
+
     def goleftattack(self):
         print(f'goleftattack')
         self.leftp()
@@ -316,37 +414,6 @@ class Customrotation(Action):
         self.rightp(x,y)
         self.rightr()
     
-
-    ############ CUSTOM ROTATION #################################################################################
-
-    def default(self,x,y):
-        if x < 30.5:
-            random.choice([self.gorightattack_fjump])()
-        elif x >= 30.5:
-            random.choice([self.goleftattack_fjump])()
-        self.post_perform_action(x,y)
-
-    ############ POST_PERFORM_ACTION #############################################################################
-    def post_perform_action(self,x,y):
-        self.now = perf_counter()
-        self.randommtimer = self.now - self.randommtimer0
-        if self.randommtimer > 15:
-            self.randommtimer0 = self.now
-            # p = random.randint(0, len(self.randomlist)-1)
-            code = random.choice(self.randomlist)
-            if code is not None:
-                print(f'randomiser {code=}')
-                self.bum_(code)
-                self._bum(code)
-        self.fountaintimer = self.now - self.fountaintimer0
-        if self.fountaintimer > 56:
-            self.fountain = True
-
-
-
-
-
-
 
 
 

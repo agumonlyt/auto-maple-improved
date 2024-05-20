@@ -2,8 +2,7 @@ import random
 import time
 from time import perf_counter
 from configparser import ConfigParser
-# from initinterception import interception, move_to, move_relative, left_click, keydown, keyup, sleep
-from src.bumblebee.initinterception import keydown, keyup, keyupall, keydown_arrow, keyup_arrow, keyupall_arrow, sleep, sleeplol
+from src.bumblebee.initinterception import keydown, keyup, keyupall, keydown_arrow, keyup_arrow, keyupall_arrow, sleep
 import win32gui
 from PIL import ImageGrab
 import json
@@ -11,21 +10,11 @@ import numpy as np
 import requests
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 class Action:
 
     def __init__(self):
+
+        ########## READ SETTINGS.INI ##############################################
         self.config = ConfigParser()
         self.config.read('src\\bumblebee\\settings.ini')
         self.atk = self.config.get('keybind', 'attack')
@@ -38,41 +27,16 @@ class Action:
         self.bossui = self.config.get('keybind', 'bossui')
         self.ardent = self.config.get('keybind', 'ardent')
         self.ipaddress = self.config.get('main', 'ipaddress')
-        self.offsety=10
-        self.offsetx=10
-        ## for main rotation
-        self.top=10.0
-        self.left=10.0
-        self.right=10.0
-        self.btm=10.0 
-        ## for stormwing map
-        self.stop=29.0
-        self.sleft=35.0 # 18.0 # 27.0
-        self.sright=130 # 125.0 # 135.0 140.0 132.5
-        self.sbtm=58.0 # 54.5
-        self.runesolver=None
-        self.g=None
-        ## timer variables goes here        
-        self.randomlist = ['z', 'x', 'c', 'space', '2', '3', '0', 'f9', 'w', 'e', 'r', 't', 's', 'd', 'f', 'v']
-        # self.randomlist = []
-        self.cosmicshowerplanttimer0=0
-        self.cosmicshowerplanttimer=0
-        self.cosmicshowerplant=True
+        
+        ########## ALL TIMER GOES HERE ######################
         self.fountaintimer0=0
         self.fountaintimer=0
         self.fountain=True
         self.randommtimer0=0
         self.randommtimer=0
-        self.runetimer0=0
-        self.runetimer=0
-        self.checkrune=True
-        self.solverune=True
         self.now=0
-        ## misc. others. 
-        self.replaceropeconnect=False
-        self.stoprune=False
-        self.maplehwnd=None # somehow only using in runesolver3()
-        ## enter portal algorithm variable goes here
+
+        ############# PORTAL USAGE ALGORITHM VARIABLES GOES HERE #############
         self.goingtoportal=False
         self.gotoportal1=False
         self.gotoportal2=False
@@ -86,13 +50,15 @@ class Action:
         self.successthreshold=180.5 # what will be the coordinate of your character if successfully entered portal. 
         self.preventgotonextmap=56.5 # if there is a goto next map portal, put here
         self.firstx = 0 # use to compare pass portal
-        ## all the entry goes here
+
+        ####### CUSTOM ROTATION VARIABLES ##############################################################################################
+        self.maplehwnd=None 
+        self.randomlist = ['z', 'z', 'z', 'z', 'z', 'z']
         self.rotation_list = ['default']
         self.rotation='default'
         self.rotation_mapping = {
             'default': self.default,
-        }  
-        self.rotation='default'
+        }
 
     def setup(self,g,maplehwnd):
         if g is not None:
@@ -129,7 +95,449 @@ class Action:
         r /= 1000
         sleep()
 
-    #################### BASIC PREDEFINED KEYPRESSES WITH SLEEP #########################3#
+    ############### VERY POWERFUL PORTAL USAGE ALGORITHM ###################
+
+    def portal_usage_check(self,x,y):
+        if self.gotoportal1:
+            if not self.goingtoportal and not (x >= self.plbm2 and x <= self.prbp2):
+                self.firstx = x
+                if x>175.5: # dangerous portal
+                    keyupall()
+                    keyupall_arrow()
+                    print(f'pressing left only (portal) {x=} {y=} ..')  
+                    self.leftp()
+                elif x < self.plb:
+                    self.rightp()
+                    self.upp()
+                    self.upr()
+                    print(f'pressing right up ..')  
+                elif x > self.prb:
+                    self.leftp()
+                    self.upp()
+                    self.upr()
+                    print(f'pressing left up ..')  
+                self.goingtoportal=True
+                return
+            elif x >= self.plbm2 and x <= self.prbp2:
+                # print(f'goingtoportal equals true ..')
+                self.goingtoportal = True
+                self.tries=55
+            if self.goingtoportal:
+                print(f'{x=} {y=} {self.tries=}')
+                if x > self.preventgotonextmap: # got a portal to other map, prevent that
+                    keyupall()
+                    keyupall_arrow()
+                    print(f'dangerous portal soon. stopping. ')
+                    self.gotoportal1=False
+                    self.goingtoportal=False
+                    self.tries=0
+                    return
+                self.upp(31,71) # tongx
+                self.upr(3,11)
+                if y <= self.successthresholdy:
+                    print(f'successfully use portal (out). {y=}')
+                    keyupall()
+                    keyupall_arrow()
+                    self.gotoportal1=False
+                    self.goingtoportal=False
+                    self.tries=0
+                    return
+                else:
+                    if self.firstx < self.plb:
+                        if x > self.prb:
+                            self.tries=55
+                    if self.firstx > self.prb:
+                        if x < self.plb:
+                            self.tries=55
+                    self.tries+=1
+                    if self.tries > 55:
+                        print(f'tries finished. ')
+                        keyupall()
+                        keyupall_arrow()
+                        self.gotoportal1=False
+                        self.goingtoportal=False
+                        self.tries=0
+                        
+                        if x >= self.plbm2 and x <= self.prbp2:
+                            print(f'send300 gotoportal1 [test=1s]')
+                            keyupall()
+                            keyupall_arrow()
+                            self.gotoportal1=False
+                            self.goingtoportal=False
+                            self.tries=0
+                            # while True:
+                            for i in range(15): # hopefully don't stucked forever
+                                g_variable = self.g.get_player_location() # double checking
+                                x, y = (None, None) if g_variable is None else g_variable
+                                if x == None:
+                                    pass
+                                else:
+                                    if y <= self.successthresholdy:
+                                        keyupall()
+                                        keyupall_arrow()
+                                        print(f'successfully use portal. {y=} [test=2s]')
+                                        break
+                                    else:
+                                        print(f'uppr saves, x, {x} {y=}')
+                                        if x < self.plb:
+                                            print(f'self.plb')
+                                            self.rightp(111,171)
+                                            self.rightr(11,71)
+                                        elif x > self.prb:
+                                            print(f'self.prb')
+                                            self.leftp(111,171)
+                                            self.leftr(11,71)
+                                        if x >= self.preventgotonextmap:
+                                            self.leftp(171,211)
+                                            self.leftr(11,71)
+                                        else:
+                                            self.upp(31,101)
+                                            self.upr(31,101)
+                                            sleep(.010)
+
+    ################## REFACTORED RUNE SOLVING PATCH ######################
+
+    def runegoupmovement(self,x=31,y=101):
+        print(f'runegoupmovement')
+        self.ropeconnectpr()
+        # time.sleep(1.7) already sleep in gotorune function
+
+    def runegodownmovement(self,x=31,y=101):
+        print(f'runegodownmovement')
+        self.downjump()
+        # time.sleep(1.7) # already sleep in gotorune function
+
+    def runegoleftmovement(self,x=31,y=101):
+        print(f'runegoleftmovement')
+        self.goleftattack_fjump()
+        time.sleep(.7)
+
+    def runegorightmovement(self,x=31,y=101):
+        print(f'runegorightmovement')
+        self.gorightattack_fjump()
+        time.sleep(.7)
+
+    def solving_rune(self):
+        self.stoprune=False
+        g_variable = self.g.get_rune_location()
+        x, y = (None, None) if g_variable is None else g_variable
+        if x == None:
+            print(f'minimap rune purple dot not found. ')
+            return     
+        else:
+            print(f'rune location: {x=} {y=}')
+            purpdist = x
+            lowdist = x - 2
+            highdist = x + 2
+            height = y + 1  # LOL
+        prevhigh = 0
+        prevhighcount = 0
+        counter = 0
+        lastdistance = 0
+        lastheight = 0
+        theI = 0
+        keyupall()
+        while (True):
+            if self.stoprune:
+                return
+            while (True):
+                print(f'theI {theI}')
+                theI += 1
+                if theI > 24:
+                    print(f'{theI} tries already! are you stucked!? returning .. ')
+                    return
+                r = random.randint(1, 4)
+                r /= 1000
+                sleep(r)
+                g_variable = self.g.get_player_location()
+                x, y = (None, None) if g_variable is None else g_variable
+                if x == None:
+                    print(f'x==None..continue..means..no..player..something blocking bruh ..f')
+                    r = random.randint(900, 1100)
+                    r /= 1000
+                    sleep(r)
+                else:
+                    break
+            print(f'solving rune? 1 ..')
+            if (x >= lowdist and x <= highdist):
+                print(f'playerx: {x}, playery: {y}, height: {height}, {purpdist =}')
+                h1 = 3
+                if y >= height-h1 and y <= height+h1:
+                    print('already at rune position')
+                    r = random.randint(770, 920)
+                    r /= 1000
+                    sleep(r)
+                    print(f'pressing npc ..')
+                    self.npcp(3,11)
+                    self.npcr()
+                    print(f'done pressing npc ..')
+                    r = random.randint(1000, 1700)
+                    r /= 1000
+                    sleep(r)
+                    self._solve_rune()
+                    return
+                else:
+                    if y == prevhigh:
+                        prevhighcount += 1
+                        if prevhighcount > 6:
+                            self.leftp()
+                            self.jumpp()
+                            self.jumpr()
+                            self.leftr()
+                    if abs(y - prevhigh) < 15:
+                        yinyang=False
+                    prevhigh = y
+                    if y > height:
+                        print(y)
+                        print(height)
+                        if abs(y-height) < 15:
+                            self.runegoupmovement() # self.jumpupjumpattack()
+                        else:
+                            self.runegoupmovement() # self.ropeconnectpr()
+                        r = random.randint(1000, 1700)
+                        r /= 1000
+                        sleep(r)
+                    else:
+                        print(y)
+                        print(height)
+                        if abs(y-height<15):
+                            self.runegodownmovement() # self.downjump()
+                        else:
+                            self.runegodownmovement() # self.downjumpv2()
+                        r = random.randint(1000, 1500)
+                        r /= 1000
+                        sleep(r)
+                    r = random.randint(500, 900)
+                    r /= 1000
+                    sleep(r)
+            else:
+                distance = x - purpdist
+                theight = y - height
+                print(f'distance: {distance}, {lastdistance}, {purpdist=}, {x=}, ')
+                if lastdistance - distance == 0:
+                    if lastheight - theight == 0:
+                        counter += 1
+                        if counter > 55:
+                            self.leftp()
+                            self.jumpp()
+                            self.jumpr()
+                            self.leftr()
+                else:
+                    counter = 0
+                lastdistance = distance
+                lastheight = theight
+                if distance > 30 or distance < -30:
+                    if distance > 30:
+                        print('hey distance > 30', distance)
+                        self.runegoleftmovement() 
+                    if distance < -30:
+                        self.runegorightmovement() 
+                elif distance > 0:
+                    distances = int(distance * 100 / 2.0)
+                    print(f'> 0 {distances}')
+                    self.leftp(distances-50, distances+50)
+                    self.leftr(100, 300)
+                    print(f'height: {height}')
+                    if height == 32:
+                        time.sleep(.6)
+                    pass
+                elif distance < 0:
+                    distances = int(abs(distance) * 100 / 2.0)
+                    print(f'< 0 {distances}')
+                    self.rightp(distances-50, distances+50)
+                    self.rightr(100, 300)
+                    if height == 32:
+                        time.sleep(.6)
+                    pass
+                elif distance == 0:
+                    pass
+
+    def _solve_rune(self):
+        now=perf_counter()
+        print('_solve_rune: solving rune ..')
+        position = win32gui.GetWindowRect(self.maplehwnd)
+        x, y, w, h = position
+        runepos = (x+121, y+143, x+697, y+371) # 800x600
+        # runepos = (x+221, y+143, x+797, y+371) # 1074x768
+        # runepos = (x+341, y+143, x+917, y+371) # 1280x720
+        # runepos = (x+381, y+143, x+957, y+371) # 1366x768
+        # runepos = (x+631, y+143, x+1207, y+371) # 1920x1080 # if this coordinate not work, lemme know!
+        print(x,y,w,h)
+        screenshot = ImageGrab.grab(runepos,all_screens=True)
+        # screenshot.show()
+        # time.sleep(5)
+        img = np.array(screenshot)
+        sendjson = {
+            'image': img.tolist()
+        }
+        link = 'http://'+self.ipaddress+':8001/'
+        link = link + 'predict'
+        r = requests.post(url=link, json=sendjson)
+        json_data = json.loads(r.text)
+        print(json_data['prediction'])
+        sms = json_data['prediction']
+        for i in range(len(sms)):
+            print(sms[i:i+1])
+            if sms[i:i+1] == 'u':
+                print('up')
+                self.upp(3,11)
+                self.upr(101,171)
+            if sms[i:i+1] == 'd':
+                print('down')
+                self.downp(3,11)
+                self.downr(101,171)
+            if sms[i:i+1] == 'l':
+                print('left')
+                self.leftp(3,11)
+                self.leftr(101,171)
+            if sms[i:i+1] == 'r':
+                print('right')
+                self.rightp(3,11)
+                self.rightr(101,171)
+            time.sleep(0.001)
+        print(f'{perf_counter()-now=}')
+
+    #################### DEFAULT ROTATION. WRITE YOUR CUSTOM ROTATION HERE. ####################################
+
+    def default(self,x,y):
+        if x < 30.5:
+            random.choice([self.gorightattack_fjump])()
+        elif x >= 30.5:
+            random.choice([self.goleftattack_fjump])()
+        self.post_perform_action(x,y)
+
+    ################## POST_PERFORM_ACTION ALWAYS PUT AT LAST FOR EASY TO READ ########################
+
+    def post_perform_action(self,x,y):
+        self.now = perf_counter()
+        self.randomtimer = self.now - self.randomtimer0
+        if self.randomtimer > 15:
+            self.randomtimer0 = self.now
+            # p = random.randint(0, len(self.randomlist)-1)
+            code = random.choice(self.randomlist)
+            if code is not None:
+                print(f'randomiser {code=}')
+                self.send2(code)
+                self.send3(code)
+        # self.fountaintimer = self.now - self.fountaintimer0
+        # if self.fountaintimer > 59:
+        #     self.fountain = True
+        
+    ############ RANDOMISER PATCH ###############
+
+    def send2(self, code):
+        keydown(code)
+        r = random.randint(31, 131)
+        r /= 1000
+        sleep(r)
+
+    def send3(self, code):
+        keyup(code)
+        r = random.randint(31, 131)
+        r /= 1000
+        sleep(r)
+
+    ## better naming. yes. 
+    def bum_(self, code, x=.031, y=.131):
+        keydown(code); sleep(random.uniform(x,y))
+
+    def _bum(self, code, x=.031, y=.131):
+        keyup(code); sleep(random.uniform(x,y))
+
+    def bee_(self, code, x=.031, y=.131):
+        keydown_arrow(code); sleep(random.uniform(x,y))
+
+    def _bee(self, code, x=.031, y=.131):
+        keyup_arrow(code); sleep(random.uniform(x,y))
+
+    def _bumblebee(self, code, x=.031, y=.131):
+        keyupall(code); sleep(random.uniform(x,y))
+
+    def bumblebee_(self, code, x=.031, y=.131):
+        keyupall_arrow(code); sleep(random.uniform(x,y))
+
+    # test purpose
+
+    def testnpc(self):
+        self.npcp()
+        self.npcr()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ################ BASIC PREDEFINED KEYPRESSES WITH SLEEP ##########################################################
+    ################ VERY UGLY CODES #################################################################################
+    ################ ADD MORE PREDEFINED KEYPRESSES WITH SLEEP BELOW #################################################
 
     def escp(self,x=31,y=101):
         keydown('esc')
@@ -824,370 +1232,3 @@ class Action:
         self.jumpp()
         self.jumpr()
         self.upr()
-
-    ############### ENTER PORTAL ALGORITHM ###################
-
-    def portalenterorskip(self,x,y):
-        if self.gotoportal1:
-            if not self.goingtoportal and not (x >= self.plbm2 and x <= self.prbp2):
-                self.firstx = x
-                if x>175.5: # dangerous portal
-                    keyupall()
-                    keyupall_arrow()
-                    print(f'pressing left only (portal) {x=} {y=} ..')  
-                    self.leftp()
-                elif x < self.plb:
-                    self.rightp()
-                    self.upp()
-                    self.upr()
-                    print(f'pressing right up ..')  
-                elif x > self.prb:
-                    self.leftp()
-                    self.upp()
-                    self.upr()
-                    print(f'pressing left up ..')  
-                self.goingtoportal=True
-                return
-            elif x >= self.plbm2 and x <= self.prbp2:
-                # print(f'goingtoportal equals true ..')
-                self.goingtoportal = True
-                self.tries=55
-            if self.goingtoportal:
-                print(f'{x=} {y=} {self.tries=}')
-                if x > self.preventgotonextmap: # got a portal to other map, prevent that
-                    keyupall()
-                    keyupall_arrow()
-                    print(f'dangerous portal soon. stopping. ')
-                    self.gotoportal1=False
-                    self.goingtoportal=False
-                    self.tries=0
-                    return
-                self.upp(31,71) # tongx
-                self.upr(3,11)
-                if y <= self.successthresholdy:
-                    print(f'successfully use portal (out). {y=}')
-                    keyupall()
-                    keyupall_arrow()
-                    self.gotoportal1=False
-                    self.goingtoportal=False
-                    self.tries=0
-                    return
-                else:
-                    if self.firstx < self.plb:
-                        if x > self.prb:
-                            self.tries=55
-                    if self.firstx > self.prb:
-                        if x < self.plb:
-                            self.tries=55
-                    self.tries+=1
-                    if self.tries > 55:
-                        print(f'tries finished. ')
-                        keyupall()
-                        keyupall_arrow()
-                        self.gotoportal1=False
-                        self.goingtoportal=False
-                        self.tries=0
-                        
-                        if x >= self.plbm2 and x <= self.prbp2:
-                            print(f'send300 gotoportal1 [test=1s]')
-                            keyupall()
-                            keyupall_arrow()
-                            self.gotoportal1=False
-                            self.goingtoportal=False
-                            self.tries=0
-                            # while True:
-                            for i in range(15): # hopefully don't stucked forever
-                                g_variable = self.g.get_player_location() # double checking
-                                x, y = (None, None) if g_variable is None else g_variable
-                                if x == None:
-                                    pass
-                                else:
-                                    if y <= self.successthresholdy:
-                                        keyupall()
-                                        keyupall_arrow()
-                                        print(f'successfully use portal. {y=} [test=2s]')
-                                        break
-                                    else:
-                                        print(f'uppr saves, x, {x} {y=}')
-                                        if x < self.plb:
-                                            print(f'self.plb')
-                                            self.rightp(111,171)
-                                            self.rightr(11,71)
-                                        elif x > self.prb:
-                                            print(f'self.prb')
-                                            self.leftp(111,171)
-                                            self.leftr(11,71)
-                                        if x >= self.preventgotonextmap:
-                                            self.leftp(171,211)
-                                            self.leftr(11,71)
-                                        else:
-                                            self.upp(31,101)
-                                            self.upr(31,101)
-                                            sleep(.010)
-
-    ################## REFACTORED RUNE SOLVING PATCH ######################
-
-    def runegoupmovement(self,x=31,y=101):
-        print(f'runegoupmovement')
-        self.ropeconnectpr()
-        # time.sleep(1.7) already sleep in gotorune function
-
-    def runegodownmovement(self,x=31,y=101):
-        print(f'runegodownmovement')
-        self.downjump()
-        # time.sleep(1.7) # already sleep in gotorune function
-
-    def runegoleftmovement(self,x=31,y=101):
-        print(f'runegoleftmovement')
-        self.goleftattack_fjump()
-        time.sleep(.7)
-
-    def runegorightmovement(self,x=31,y=101):
-        print(f'runegorightmovement')
-        self.gorightattack_fjump()
-        time.sleep(.7)
-
-    def solving_rune(self):
-        self.stoprune=False
-        g_variable = self.g.get_rune_location()
-        x, y = (None, None) if g_variable is None else g_variable
-        if x == None:
-            print(f'x==None..continue..means..no..rune..')
-            return     
-        else:
-            print(f'rune location: {x=} {y=}')
-            purpdist = x
-            lowdist = x - 2
-            highdist = x + 2
-            height = y + 1  # LOL
-        prevhigh = 0
-        prevhighcount = 0
-        counter = 0
-        lastdistance = 0
-        lastheight = 0
-        theI = 0
-        keyupall()
-        while (True):
-            if self.stoprune:
-                return
-            while (True):
-                print(f'theI {theI}')
-                theI += 1
-                if theI > 24:
-                    print(f'{theI} tries already! are you stucked!? returning .. ')
-                    return
-                r = random.randint(1, 4)
-                r /= 1000
-                sleep(r)
-                g_variable = self.g.get_player_location()
-                x, y = (None, None) if g_variable is None else g_variable
-                if x == None:
-                    print(f'x==None..continue..means..no..player..something blocking bruh ..f')
-                    r = random.randint(900, 1100)
-                    r /= 1000
-                    sleep(r)
-                else:
-                    break
-            print(f'solving rune? 1 ..')
-            if (x >= lowdist and x <= highdist):
-                print(f'playerx: {x}, playery: {y}, height: {height}, {purpdist =}')
-                h1 = 3
-                if y >= height-h1 and y <= height+h1:
-                    print('already at rune position')
-                    r = random.randint(770, 920)
-                    r /= 1000
-                    sleep(r)
-                    print(f'pressing npc ..')
-                    self.npcp(3,11)
-                    self.npcr()
-                    print(f'done pressing npc ..')
-                    r = random.randint(1000, 1700)
-                    r /= 1000
-                    sleep(r)
-                    self._solve_rune()
-                    return
-                else:
-                    if y == prevhigh:
-                        prevhighcount += 1
-                        if prevhighcount > 6:
-                            self.leftp()
-                            self.jumpp()
-                            self.jumpr()
-                            self.leftr()
-                    if abs(y - prevhigh) < 15:
-                        yinyang=False
-                    prevhigh = y
-                    if y > height:
-                        print(y)
-                        print(height)
-                        if abs(y-height) < 15:
-                            self.runegoupmovement() # self.jumpupjumpattack()
-                        else:
-                            self.runegoupmovement() # self.ropeconnectpr()
-                        r = random.randint(1000, 1700)
-                        r /= 1000
-                        sleep(r)
-                    else:
-                        print(y)
-                        print(height)
-                        if abs(y-height<15):
-                            self.runegodownmovement() # self.downjump()
-                        else:
-                            self.runegodownmovement() # self.downjumpv2()
-                        r = random.randint(1000, 1500)
-                        r /= 1000
-                        sleep(r)
-                    r = random.randint(500, 900)
-                    r /= 1000
-                    sleep(r)
-            else:
-                distance = x - purpdist
-                theight = y - height
-                print(f'distance: {distance}, {lastdistance}, {purpdist=}, {x=}, ')
-                if lastdistance - distance == 0:
-                    if lastheight - theight == 0:
-                        counter += 1
-                        if counter > 55:
-                            self.leftp()
-                            self.jumpp()
-                            self.jumpr()
-                            self.leftr()
-                else:
-                    counter = 0
-                lastdistance = distance
-                lastheight = theight
-                if distance > 30 or distance < -30:
-                    if distance > 30:
-                        print('hey distance > 30', distance)
-                        self.runegoleftmovement() 
-                    if distance < -30:
-                        self.runegorightmovement() 
-                elif distance > 0:
-                    distances = int(distance * 100 / 2.0)
-                    print(f'> 0 {distances}')
-                    self.leftp(distances-50, distances+50)
-                    self.leftr(100, 300)
-                    print(f'height: {height}')
-                    if height == 32:
-                        time.sleep(.6)
-                    pass
-                elif distance < 0:
-                    distances = int(abs(distance) * 100 / 2.0)
-                    print(f'< 0 {distances}')
-                    self.rightp(distances-50, distances+50)
-                    self.rightr(100, 300)
-                    if height == 32:
-                        time.sleep(.6)
-                    pass
-                elif distance == 0:
-                    pass
-
-    def _solve_rune(self):
-        now=perf_counter()
-        print('_solve_rune: solving rune ..')
-        position = win32gui.GetWindowRect(self.maplehwnd)
-        x, y, w, h = position
-        runepos = (x+121, y+143, x+697, y+371) # 800x600
-        # runepos = (x+221, y+143, x+797, y+371) # 1074x768
-        # runepos = (x+341, y+143, x+917, y+371) # 1280x720
-        # runepos = (x+381, y+143, x+957, y+371) # 1366x768
-        # runepos = (x+631, y+143, x+1207, y+371) # 1920x1080 # if this coordinate not work, lemme know!
-        print(x,y,w,h)
-        screenshot = ImageGrab.grab(runepos,all_screens=True)
-        # screenshot.show()
-        # time.sleep(5)
-        img = np.array(screenshot)
-        sendjson = {
-            'image': img.tolist()
-        }
-        link = 'http://'+self.ipaddress+':8001/'
-        link = link + 'predict'
-        r = requests.post(url=link, json=sendjson)
-        json_data = json.loads(r.text)
-        print(json_data['prediction'])
-        sms = json_data['prediction']
-        for i in range(len(sms)):
-            print(sms[i:i+1])
-            if sms[i:i+1] == 'u':
-                print('up')
-                self.upp(3,11)
-                self.upr(101,171)
-            if sms[i:i+1] == 'd':
-                print('down')
-                self.downp(3,11)
-                self.downr(101,171)
-            if sms[i:i+1] == 'l':
-                print('left')
-                self.leftp(3,11)
-                self.leftr(101,171)
-            if sms[i:i+1] == 'r':
-                print('right')
-                self.rightp(3,11)
-                self.rightr(101,171)
-            time.sleep(0.001)
-        print(f'{perf_counter()-now=}')
-
-    #################### DEFAULT ROTATION. WRITE YOUR CUSTOM ROTATION HERE. ####################################
-
-    def default(self,x,y):
-        if x < 30.5:
-            random.choice([self.gorightattack_fjump])()
-        elif x >= 30.5:
-            random.choice([self.goleftattack_fjump])()
-        self.post_perform_action(x,y)
-
-    ################## POST_PERFORM_ACTION ALWAYS PUT AT LAST FOR EASY TO READ ########################
-
-    def post_perform_action(self,x,y):
-        self.now = perf_counter()
-        self.randomtimer = self.now - self.randomtimer0
-        if self.randomtimer > 15:
-            self.randomtimer0 = self.now
-            # p = random.randint(0, len(self.randomlist)-1)
-            code = random.choice(self.randomlist)
-            if code is not None:
-                print(f'randomiser {code=}')
-                self.send2(code)
-                self.send3(code)
-        # self.fountaintimer = self.now - self.fountaintimer0
-        # if self.fountaintimer > 59:
-        #     self.fountain = True
-        
-    ############ RANDOMISER PATCH ###############
-
-    def send2(self, code):
-        keydown(code)
-        r = random.randint(31, 131)
-        r /= 1000
-        sleep(r)
-
-    def send3(self, code):
-        keyup(code)
-        r = random.randint(31, 131)
-        r /= 1000
-        sleep(r)
-
-    ## better naming. yes. 
-    def bum_(self, code, x=31, y=131):
-        keydown(code); sleep(random.uniform(x,y))
-
-    def _bum(self, code, x=31, y=131):
-        keyup(code); sleep(random.uniform(x,y))
-
-    def bee_(self, code, x=31, y=131):
-        keydown_arrow(code); sleep(random.uniform(x,y))
-
-    def _bee(self, code, x=31, y=131):
-        keyup_arrow(code); sleep(random.uniform(x,y))
-
-    def _bumblebee(self, code, x=31, y=131):
-        keyupall(code); sleep(random.uniform(x,y))
-
-    def _beeblebum(self, code, x=31, y=131):
-        keyupall_arrow(code); sleep(random.uniform(x,y))
-
-    # test purpose
-
-    def testnpc(self):
-        self.npcp()
-        self.npcr()

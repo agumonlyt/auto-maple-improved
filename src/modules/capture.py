@@ -73,9 +73,18 @@ class Capture:
     def _main(self):
         """Constantly monitors the player's position and in-game events."""
         
+        self.ready = True
+
+        handle = user32.FindWindowW(None, 'MapleStory')
+        rect = wintypes.RECT()
+        user32.GetWindowRect(handle, ctypes.pointer(rect))
+        rect = (rect.left, rect.top, rect.right, rect.bottom)
+        rect = tuple(max(0, x) for x in rect)
+
+        config.maplehwnd = handle
+
         # detection goes here. 
         
-        self.ready = True
 
     def _main_(self): # (original auto-maple _main)
         """Constantly monitors the player's position and in-game events."""

@@ -83,7 +83,7 @@ class Character:
         self.replaceropeconnect=False
         # self.teleport=True
         # self.ac = Action()
-        self.ac = None
+        self.action = None
         self.classtype = {
             'customrotation': Customrotation,
             # 'mycharacterign': Mycharacterign,
@@ -149,20 +149,9 @@ class Character:
             # 'bishop': Bishop,
         }
 
-    def setup(self,left,right,top,btm,classtype=None,runesolver=None,g=None,rotation=None,maplehwnd=None):
-        self.left=left
-        self.right=right
-        self.top=top
-        self.btm=btm
-        self.ac=self.classtype[classtype]() if classtype is not None else self.ac
-        # print(f'{self.ac=} {classtype=}')
-        self.ac.left=left
-        self.ac.right=right
-        self.ac.top=top
-        self.ac.btm=btm
-        self.ac.setup(runesolver,g,rotation,maplehwnd)
-        # print(f'setup complete. {left=} {right=} {top=} {btm=}')
-        # print(f'{self.ac.left=} {self.ac.right=} {self.ac.top=} {self.ac.btm=}')
+    def setup(self,classtype=None,g=None,maplehwnd=None):        
+        self.action=self.classtype[classtype]() if classtype is not None else self.action
+        self.action.setup(g,maplehwnd)
 
     def change_ac_type(self, classtype):
         if classtype in self.classtype:

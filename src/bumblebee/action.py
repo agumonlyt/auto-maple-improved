@@ -94,11 +94,7 @@ class Action:
         }  
         self.rotation='default'
 
-    def setup(self,runesolver,g,rotation,maplehwnd):
-        if runesolver is not None:
-            self.runesolver=runesolver
-        if rotation is not None:
-            self.rotation=rotation
+    def setup(self,g,maplehwnd):
         if g is not None:
             self.g=g
         if maplehwnd is not None:

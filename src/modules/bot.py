@@ -17,6 +17,12 @@ from src.routine.components import Point
 from src.common.vkeys import press, click
 from src.common.interfaces import Configurable
 
+# Extra import from BumblebeeBot patch
+from time import perf_counter
+import keyboard as pythonkeyboard
+from src.bumblebee.initinterception import left_click, right_click, initiate_move, auto_capture_devices2, keydown, keyup, keyupall, keydown_arrow, keyup_arrow, keyupall_arrow
+from src.bumblebee.game import Game
+
 
 # The rune's buff icon
 RUNE_BUFF_TEMPLATE = cv2.imread('assets/rune_buff_template.jpg', 0)
@@ -74,26 +80,80 @@ class Bot(Configurable):
         :return:    None
         """
         
-        # g = Game((8, 63, self.minimapX, self.minimapY)) #
-        # self.character.setup(
-        #     classtype='customrotation',
-        #     g=self.g,
-        #     maplehwnd=self.maplehwnd
-        # )
+
+        g = Game((8, 63, 200, 140)) #
+        self.character.setup(
+            classtype='customrotation',
+            g=self.g,
+            maplehwnd=config.maplehwnd
+        )
 
         self.ready = True
         # config.listener.enabled = True
         # last_fed = time.time()
         while True:
-            if config.enabled:
-                now = time.time()
-                
-                if self.rune_active:
-                    print(f'rune_active_character_ac_solving_rune')
-                    # self.character.ac.solving_rune()
-                time.sleep(1)
-                # element.execute()
-                # config.routine.step()
+            if pythonkeyboard.is_pressed("esc"):
+                config.enabled=False
+            if not config.enabled:
+                keyupall()
+                keyupall_arrow()
+                print(f'script is paused .. press f9 to resume. ')
+                while not config.enabled:
+                    time.sleep(1)
+                    if pythonkeyboard.is_pressed("f9"):
+                        config.enabled=True
+                        print(f'script resumed ..')
+            if self.character.ac.goingtoportal or self.character.ac.gotoportal1 or self.character.ac.gotoportal2 or self.character.ac.gotoportal3 or self.character.ac.gotoportal4:
+                time.sleep(.0001) # 
+            else:
+                time.sleep(.011) # 
+            player_location = g.get_player_location()
+            x, y = (None, None) if player_location is None else player_location
+            if x == None or y == None:
+                xynotfound+=1
+                if xynotfound > 70:
+                    t = time.localtime()
+                    currenttime = time.strftime("%H:%M:%S", t)
+                    print(f'character not found error .. exit program .. {currenttime}')
+                    config.enabled=False
+                print(f'x==None, pass ..')
+                time.sleep(.1)
+            else: #
+                xynotfound=0
+                self.character.perform_next_attack(x,y)
+
+                if self.character.ac.goingtoportal or self.character.ac.gotoportal1 or self.character.ac.gotoportal2 or self.character.ac.gotoportal3 or self.character.ac.gotoportal4:
+                    pass
+                else:
+                    now=perf_counter()                
+                    cctimer=now-cctimer0
+                    if cctimer>3000: # 60sec * 50min = 3000sec
+                        # cc=True
+                        keyupall()
+                        keyupall_arrow()
+                        self.changechannel()
+                        cctimer0=perf_counter() # reset
+                        self.cc=False
+                    if self.cc: # this is for red dot. 
+                        keyupall()
+                        keyupall_arrow()
+                        self.changechannel_zakum() # we don't go ardent because it has 5 min cd. 
+                        self.cc=False
+                    runetimer=now-runetimer0
+                    if runetimer > self.runecd:
+                        if not await self.FindRuneCDIcon():
+                            await self.character.gotorune() # and solve rune.
+                        runetimer0=now
+
+
+
+            if self.rune_active:
+                print(f'rune_active_character_ac_solving_rune')
+                # self.character.ac.solving_rune()
+            time.sleep(1)
+            # element.execute()
+            # config.routine.step()
+
 
     def _main_(self): # (the original auto-maple main)
         """
@@ -125,13 +185,11 @@ class Bot(Configurable):
                 config.gui.view.details.display_info(config.routine.index)
 
                 # Execute next Point in the routine
-                # element = config.routine[config.routine.index]
+                element = config.routine[config.routine.index]
                 # if self.rune_active and isinstance(element, Point) and element.location == self.rune_closest_pos:
-                if self.rune_active:
                     # self._solve_rune(model)
-                    self._bumblebeerune()
-                # element.execute()
-                # config.routine.step()
+                element.execute()
+                config.routine.step()
             else:
                 time.sleep(0.01)
 

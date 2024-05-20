@@ -15,12 +15,12 @@ notifier = Notifier()
 listener = Listener()
 # telegram = Telegram()
 
-bot.start()
-while not bot.ready:
-    time.sleep(0.01)
-
 capture.start()
 while not capture.ready:
+    time.sleep(0.01)
+
+bot.start()
+while not bot.ready:
     time.sleep(0.01)
 
 notifier.start()

@@ -43,3 +43,9 @@ listener = None
 
 # Shares the gui to all modules
 gui = None
+
+
+##################################################
+#       BumblebeeBot Extra Global Variables      #
+##################################################
+maplehwnd = None

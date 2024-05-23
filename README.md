@@ -5,6 +5,11 @@
 - Disabled most auto-maple default _main. 
 - Not using command book. If you know how to setup command book, feel free to use it. 
 
+- new project: you can develop your own macro 'recorder' maplestory style, which means you take in x and y value of your character, 
+then perform actions accordingly. this is the first step, to create individual functions dynamically. second step is to generate x,y tree
+dynamically, through various ways, json, xml, csv, whatever. 
+![MACRO_TEST!](assets/macro_test.png)
+
 .
 .
 .
